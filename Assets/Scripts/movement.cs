@@ -1,5 +1,5 @@
 using UnityEngine;
-
+using UnityEngine.InputSystem;
 
 public class movement : MonoBehaviour
 {
@@ -47,7 +47,6 @@ public class movement : MonoBehaviour
         {
             rb.linearDamping = 0;
         }
-        Debug.Log(rb.linearVelocity);
     }
 
     private void FixedUpdate()
@@ -65,13 +64,13 @@ public class movement : MonoBehaviour
     {
         jumpReady = true;
     }
-    public void OnMove(UnityEngine.InputSystem.InputValue value) 
+    public void OnMove(InputValue value) 
     { 
         Vector2 input = value.Get<Vector2>(); 
         horizontalInput = input.x; 
         verticalInput = input.y; 
     }
-    public void OnJump(UnityEngine.InputSystem.InputValue value) 
+    public void OnJump(InputValue value) 
     { 
         if (value.isPressed && grounded && jumpReady) 
         { jumpReady = false; 
