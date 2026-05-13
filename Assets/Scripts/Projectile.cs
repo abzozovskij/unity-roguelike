@@ -3,16 +3,28 @@ using UnityEngine;
 public class Projectile : MonoBehaviour
 {
     public float damage = 10f;
+    public float damageScaling = 5f;
+    public float lifeTime = 5f;
 
-    private void OnCollisionEnter(Collision collision)
+    public void SetEnemy(Enemy enemy)
     {
-        Player player = collision.collider.GetComponentInParent<Player>();
-        Debug.Log("Hit: " + collision.collider.name);
-        if (player != null)
+        if (enemy.level > 1)
         {
-            player.TakeDamage(damage);
+            damage += damageScaling * (enemy.level - 1);
         }
 
+        Destroy(gameObject, lifeTime);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        Player player = other.GetComponentInParent<Player>();
+
+        if (player != null)
+        {
+            player.TakeDamage(damage, false);
+        }
         Destroy(gameObject);
     }
+
 }
