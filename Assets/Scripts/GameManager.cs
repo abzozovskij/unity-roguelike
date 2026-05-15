@@ -23,6 +23,12 @@ public class GameManager : MonoBehaviour
     public GameObject pauseMenu;
     public GameObject controls;
     private bool paused = false;
+
+    private void Awake()
+    {
+        Time.timeScale = 1f;
+    }
+
     private void Start()
     {
         playerInput = FindFirstObjectByType<PlayerInput>();
