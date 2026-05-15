@@ -56,6 +56,9 @@ public class Enemy : MonoBehaviour
     public int coinScaling = 5;
     private Collider playerCollider;
 
+    [Header("Audio")]
+    public AudioSource audioSource;
+    public AudioClip attackSound;
     private void Awake()
     {
         playert = GameObject.Find("Player").transform;
@@ -246,6 +249,11 @@ public class Enemy : MonoBehaviour
             Transform shootPoint = shootPoints[shootIndex];
             Vector3 dir = (playerCollider.bounds.center - shootPoint.position).normalized;
             GameObject proj = Instantiate(projectile, shootPoint.position, Quaternion.identity);
+            if (attackSound != null && audioSource != null)
+            {
+                audioSource.PlayOneShot(attackSound);
+            }
+
             proj.GetComponent<Projectile>().SetEnemy(this);
 
             Rigidbody rb = proj.GetComponent<Rigidbody>();
@@ -289,9 +297,7 @@ public class Enemy : MonoBehaviour
 
         if (Physics.Raycast(origin, dir.normalized, out RaycastHit hit, dist, ~0, QueryTriggerInteraction.Ignore))
         {
-            Debug.DrawRay(origin, dir.normalized * dist, Color.red);
 
-            // Walk up the hierarchy and see if this thing belongs to the player
             Player p = hit.transform.GetComponentInParent<Player>();
             return p != null;
         }

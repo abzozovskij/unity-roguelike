@@ -1,6 +1,7 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.InputSystem;
 public class Player : MonoBehaviour
 {  
     [Header("Player Attributes")]
@@ -17,7 +18,7 @@ public class Player : MonoBehaviour
     public Slider healthBar;
     public Slider shieldBar;
     public TextMeshProUGUI healthValue;
-    public GameObject youDiedText;
+    public GameObject youDied;
     public Image damagedEffect;
     public float damageEffectSpeed = 5f;
     public float damagedAlpha = 0.4f;
@@ -28,9 +29,11 @@ public class Player : MonoBehaviour
     [Header("Misc")]
     public GameObject playerweapon;
     public movement movement;
+    public bool died = false;
+    private PlayerInput playerInput;
     void Start()
     {
- 
+        playerInput = FindFirstObjectByType<PlayerInput>();
         health = maxHealth;
         healthBar.maxValue = maxHealth;
  
@@ -93,7 +96,7 @@ public class Player : MonoBehaviour
             return;
         }
         if (damageEffectActive == true){
-            // Trigger damage flash
+            //red when hit
             overlayColour = damagedEffect.color;
             overlayColour.a = damagedAlpha;
             damagedEffect.color = overlayColour;
@@ -142,8 +145,12 @@ public class Player : MonoBehaviour
 
     public void Die()
     {
-        youDiedText.SetActive(true);
+        died = true;
+        youDied.SetActive(true);
         Time.timeScale = 0f;
+        playerInput.SwitchCurrentActionMap("UI");
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
         Destroy(playerweapon);
     }
 }

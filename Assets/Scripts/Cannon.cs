@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
+using System.Collections.Generic;
+
 public class Cannon : MonoBehaviour
 {
 
@@ -31,6 +33,9 @@ public class Cannon : MonoBehaviour
     public float baseDamage;
     public GameObject leftCannon;
     public bool isLeftCannon = false;
+    [Header("Explosive Settings")]
+    public bool explosive = false;
+    public float explosionRadius = 2f;
     [Header("UI Elements")]
     public Slider cooldownBar;
     private Image cooldownFill;
@@ -93,7 +98,7 @@ public class Cannon : MonoBehaviour
 
     public void OnAttack(InputValue value)
     {
-        if (Time.timeScale == 0f)
+        if (Time.timeScale < 0.1f)
         {
             isFiring = false;
             return;
@@ -122,18 +127,71 @@ public class Cannon : MonoBehaviour
 
             Enemy enemy = hit.transform.GetComponent<Enemy>();
             EnemyBall enemyb = hit.transform.GetComponent<EnemyBall>();
-            if(enemy != null)
+            BossEnemy enemyBoss = hit.transform.GetComponent<BossEnemy>();
+            if (!explosive)
             {
-                enemy.TakeDamage(damage);
-            }else if(enemyb != null)
+                // Normal hitscan damage
+                if (enemy != null)
+                {
+                    enemy.TakeDamage(damage);
+                }
+                    
+                else if (enemyb != null)
+                {
+                    enemyb.TakeDamage(damage);
+                } else if(enemyBoss != null)
+                {
+                    enemyBoss.TakeDamage(damage);
+                }
+                    
+            }
+            else
             {
-                enemyb.TakeDamage(damage);
+                // Explosive AOE damage
+                CreateExplosion(hit.point);
             }
 
             GameObject impactobj = Instantiate(impact, hit.point, Quaternion.LookRotation(hit.normal));
             Destroy(impactobj, 2f);
         }
     }
+
+    void CreateExplosion(Vector3 position)
+    {
+        HashSet<Enemy> damagedEnemies = new HashSet<Enemy>();
+        HashSet<EnemyBall> damagedBalls = new HashSet<EnemyBall>();
+
+        if (impact != null)
+        {
+            GameObject boom = Instantiate(impact, position, Quaternion.identity);
+            Destroy(boom, 3f);
+        }
+
+        Collider[] hits = Physics.OverlapSphere(position, explosionRadius);
+
+        foreach (Collider col in hits)
+        {
+            Enemy enemy = col.GetComponent<Enemy>();
+            EnemyBall enemyb = col.GetComponent<EnemyBall>();
+            BossEnemy enemyBoss = col.transform.GetComponent<BossEnemy>();
+            if (enemy != null && !damagedEnemies.Contains(enemy))
+            {
+                damagedEnemies.Add(enemy);
+                enemy.TakeDamage(damage);
+            }
+            else if (enemyb != null && !damagedBalls.Contains(enemyb))
+            {
+                damagedBalls.Add(enemyb);
+                enemyb.TakeDamage(damage);
+            }
+            else if (enemyBoss != null)
+            {
+                enemyBoss.TakeDamage(damage);
+            }
+        }
+
+    }
+
 
     public void ScaleLevel(int lvl)
     {

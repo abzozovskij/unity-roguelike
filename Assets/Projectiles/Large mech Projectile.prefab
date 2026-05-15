@@ -174,7 +174,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damage: 3
-  damageScaling: 5
+  damageScaling: 1
   lifeTime: 5
 --- !u!108 &862190359493133933
 Light:

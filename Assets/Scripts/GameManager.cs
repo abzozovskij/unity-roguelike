@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine.UI;
 using TMPro;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 public class GameManager : MonoBehaviour
 {
     public List<Power> powers;
@@ -12,10 +13,28 @@ public class GameManager : MonoBehaviour
     public GameObject powersUI;
     public GameObject crosshair;
     public GameObject cdBar;
-
+    public Player player;
+    public AudioSource musicSource;
+    private InputAction pauseAction;
+    public AudioClip normalMusic;
+    public AudioClip combatMusic;
+    AudioLowPassFilter lp;
+    public Completion completion;
+    public GameObject pauseMenu;
+    public GameObject controls;
+    private bool paused = false;
     private void Start()
     {
         playerInput = FindFirstObjectByType<PlayerInput>();
+        player = FindFirstObjectByType<Player>();
+        PlayNormalMusic();
+        lp = musicSource.GetComponent<AudioLowPassFilter>();
+        playerInput = FindFirstObjectByType<PlayerInput>();
+        completion = FindFirstObjectByType<Completion>();
+        pauseAction = playerInput.actions["Pause"];
+        Debug.Log(lp);
+
+
     }
     public void ApplyPower(Power power)
     {
@@ -70,14 +89,109 @@ public class GameManager : MonoBehaviour
         Cursor.visible = false;
         crosshair.SetActive(true);
         cdBar.SetActive(true);
+        player.maxHealth = Mathf.Ceil(player.maxHealth * 1.10f);
+        player.health = Mathf.Ceil(player.health * 1.10f);
         Time.timeScale = 1f;
         ApplyPower(choices[index]);
         playerInput.SwitchCurrentActionMap("Player");
     }
 
+    public void PlayNormalMusic()
+    {
+        musicSource.clip = normalMusic;
+        musicSource.loop = true;
+        musicSource.Play();
+    }
+
+    public void PlayCombatMusic()
+    {
+        musicSource.clip = combatMusic;
+        musicSource.loop = true;
+        musicSource.Play();
+    }
+
+
+    public void PauseGame()
+    {
+        if (player.died || completion.completed)
+        {
+            return;
+        }
+
+        lp.cutoffFrequency = 600f;
+        Time.timeScale = 0.09f;
+        paused = true;
+        playerInput.SwitchCurrentActionMap("UI");
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        pauseMenu.SetActive(true);
+        
+
+    }
+    public void ResumeGame()
+    {
+        if (player.died || completion.completed)
+        {
+            return;
+        }
+
+        lp.cutoffFrequency = 22000f;
+        Time.timeScale = 1f;
+        paused = false;
+        playerInput.SwitchCurrentActionMap("Player");
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        pauseMenu.SetActive(false);
+        controls.SetActive(false);
+        
+    }
+
+    public void QuitToMenu()
+    {
+        SceneManager.LoadScene("MainMenu");
+    }
+    public void ShowControls()
+    {
+        controls.SetActive(true);
+    }
+
+    public void CloseControls()
+    {
+        controls.SetActive(false);
+    }
+
+    public void QuitGame()
+    {
+        Application.Quit();
+    }
+    public void OnPause()
+    {
+        if (paused)
+        {
+            ResumeGame();
+        }
+        else
+        {
+            PauseGame();
+        }
+    }
 
     void Update()
     {
-        
+        if (pauseAction.triggered)
+        {
+            if (paused)
+            {
+                ResumeGame();
+            }
+
+            else
+            {
+                PauseGame();
+            }
+                
+        }
     }
+
+
 }

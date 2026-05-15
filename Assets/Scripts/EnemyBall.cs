@@ -87,7 +87,7 @@ public class EnemyBall : MonoBehaviour
     {
         playerInSightRange = Physics.CheckSphere(transform.position, sightRange, isplayer);
         playerInAttackRange = Physics.CheckSphere(transform.position, attackRange, isplayer);
-        Debug.Log($"Enemy [{name}] sight={playerInSightRange} attack={playerInAttackRange} walkPointSet={walkPointSet} hasPath={agent.hasPath} isOnNavMesh={agent.isOnNavMesh}");
+       
 
         float dist = Vector3.Distance(transform.position, playert.position);
         if (!playerInSightRange && !playerInAttackRange)
@@ -235,7 +235,7 @@ public class EnemyBall : MonoBehaviour
         {
             Vector3 rollAxis = Vector3.Cross(velocity.normalized, Vector3.up);
 
-            model.Rotate(rollAxis, rollSpeed * Time.deltaTime, Space.World);
+            model.Rotate(-rollAxis, rollSpeed * Time.deltaTime, Space.World);
         }
     }
     private void OnTriggerEnter(Collider other)

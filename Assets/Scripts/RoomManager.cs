@@ -6,10 +6,14 @@ public class RoomManager : MonoBehaviour
     public GameObject[] barriers;
     public Enemy[] enemies;
     public EnemyBall[] enemyBall;
+    public BossEnemy[] bossEnemy;
     public GameManager gameManager;
     public GameObject powersUI;
     private bool roomActivated = false;
     private bool powerChosen = false;
+    private bool firstEntry = false;
+    private bool musicReset = false;
+
 
     private void OnTriggerEnter(Collider other)
     {
@@ -22,6 +26,11 @@ public class RoomManager : MonoBehaviour
         if (other.CompareTag("Player"))
         {
             roomActivated = true;
+            if (!firstEntry)
+            {
+                firstEntry = true;
+                gameManager.PlayCombatMusic();
+            }
             foreach (var barrier in barriers)
             {
                 barrier.SetActive(true);
@@ -35,6 +44,12 @@ public class RoomManager : MonoBehaviour
         if (roomActivated && RoomClear())
         {
             barriers[1].SetActive(false);
+            if (!musicReset)
+            {
+                gameManager.PlayNormalMusic();
+                musicReset = true;
+            }
+            
             if (!powersUI.activeSelf && !powerChosen)
             {
                 gameManager.ShowRandomPowers();
@@ -56,6 +71,13 @@ public class RoomManager : MonoBehaviour
         foreach(var roller in enemyBall)
         {
             if(roller != null && roller.isActiveAndEnabled)
+            {
+                return false;
+            }
+        }
+        foreach(var boss in bossEnemy)
+        {
+            if(boss != null && boss.isActiveAndEnabled)
             {
                 return false;
             }
